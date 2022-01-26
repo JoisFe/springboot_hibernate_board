@@ -1,0 +1,90 @@
+<html lang="ko" xmlns xmlns:th="http://www.w3.org/1999/xhtml" : th="http://www.thymeleaf.org">
+
+<head>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/latest/js/bootstrap.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>회원 가입 페이지</title>
+
+    <script src="js/includeHTML.js"></script>
+
+    </script>
+    <style>
+        body {
+            background: #f8f8f8;
+            padding: 100px 0;
+        }
+
+        #login-form > div {
+            margin: 50px 0;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<div th:unless="${session.id}"><nav include-html="html/nav.html"></nav></div>
+<div th:if="${session.id}"><nav include-html="html/nav2.html"></nav></div>
+
+<h1 class="text-center text-danger">회원 가입 하기</h1>
+
+<div class="container">
+    <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <div class="panel-title">회원가입 페이지 입니다.</div>
+            </div>
+
+            <script th:inline="javascript">
+                $(document).on('ready', function (e) {
+                    $("#registerBtn").click(function () {
+                        let userId = $("input[name=userId]").val();
+                        let password = $("input[type=password]").val();
+                        let samePassword = $("input[name=samePassword]").val();
+
+                        $.post("/register",
+                            {
+                                username: userId,
+                                password: password,
+                                samePassword: samePassword
+                            },
+                            function (data) { //data가 controller에서 리턴해주는 값
+                                if (data === "success") {
+                                    location.href = "/";
+                                } else {
+                                    alert(data); // 그냥 data를 alert해도 되고
+                                }
+                            });
+                    });
+                });
+
+            </script>
+
+
+            <div>
+
+                <div><i class="fas fa-member"></i>
+                    <input type="text" class="form-control" placeholder='ID' name="userId"/>
+
+                </div>
+                <div>
+                    <input type="password" class="form-control" placeholder="Password" name="password">
+                </div>
+                <div>
+                    <input type="password" class="form-control" placeholder="Password 확인" name="samePassword"/>
+                </div>
+
+                <button id="registerBtn" class="btn btn-danger btn-sm float-right">회원가입</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<script>
+    includeHTML();
+</script>
+</html>

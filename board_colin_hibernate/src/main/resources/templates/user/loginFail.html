@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 실패</title>
+<style>
+    body{padding:0px; margin:0px}
+
+    #divPosition{
+        position:absolute;
+        height:300px;
+        width:400px;
+        margin:-150px 0px 0px -200px;
+        top:50%;
+        left:50%;
+        padding:5px;
+    }
+</style>
+
+</head>
+<body>
+<div id = "divPosition">
+<nav include-html="html/nav.html"></nav>
+<h1>로그인을 해주세요.</h1>
+    <form id = "goLoginPage" action = "/" method="get">
+<button type="submit" id="loginPageBtn" class="btn btn-info btn-sm float-right" >로그인 페이지로</button>
+    </form>
+</div>
+</body>
+</html>

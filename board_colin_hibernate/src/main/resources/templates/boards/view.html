@@ -1,0 +1,259 @@
+<html xmlns xmlns:th="http://www.w3.org/1999/xhtml" : th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 상세 페이지</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+
+    <script src="js/includeHTML.js"></script>
+
+    <script src="mustache.min.js"></script>
+</head>
+<body>
+<script th:inline="javascript">
+    let message = [[${message}]];
+
+    if (message !== null) alert(message);
+</script>
+
+<div th:unless="${session.id}"><nav include-html="html/nav.html"></nav></div>
+<div th:if="${session.id}"><nav include-html="html/nav2.html"></nav></div>
+
+
+<div style="position: absolute;left:150px; right:150px; top:60px">
+    <h1 class="text-center text-danger">게시글 상세 내용</h1>
+    <p>글번호 : [[${view.id}]]</p>
+    <p id="title">제목 : [[${view.title}]]</p>
+    <p>작성자 : [[${view.author.username}]]</p>
+    내용 :
+    <div id="content">
+<textarea readonly="readonly"
+          class="form-control"
+          th:text="${view.content}">
+</textarea>
+    </div>
+    <div th:if="${session.id} == ${view.author.username}"><button id="deleteBtn" class="btn btn-danger btn-sm float-right">삭제</button></div>
+    <div th:if="${session.id} == ${view.author.username}"><button id="updateBtn" class="btn btn-info btn-sm float-right">수정</button></div>
+
+</div>
+
+
+<script th:inline="javascript">
+    let sessionId = [[${session.id}]];
+    let id = [[${view.id}]];
+    let writerId = [[${view.author.username}]];
+    let loginId = [[${id}]];
+    let title = [[${view.title}]];
+    let content = [[${view.content}]];
+    let authorId = [[${view.author.id}]];
+
+    let userAuthorId = [[${userAuthorId}]]
+
+</script>
+
+<script th:inline="javascript">
+    $(document).on('ready', function (e) {
+        $(document).on('click', '#deleteBtn', function (e) {
+            $.post("/delete",
+                {
+                    id: id,
+                    title: title,
+                    content: content,
+                    author: loginId
+                },
+                function (data) { //data가 controller에서 리턴해주는 값
+                    if (data === "success") {
+                        location.href = "/main";
+                    } else {
+                        alert(data); // 그냥 data를 alert해도 되고
+                    }
+                })
+        })
+
+        $(document).on('click', '#updateConfirmBtn', function (e) {
+            let updateTitle = $('#updateTitle').val();
+            let updateContent = $('#updateContent').val();
+
+            $.post("/update",
+                {
+                    id: id,
+                    title: updateTitle,
+                    content: updateContent,
+                    author: authorId
+                },
+                function (data) { //data가 controller에서 리턴해주는 값
+                    if (data === "success") {
+                        location.href = "/view?id=" + id;
+                    } else {
+                        alert(data); // 그냥 data를 alert해도 되고
+                    }
+                })
+        })
+
+        $(document).on('click', '#updateBtn', function (e) {
+            let str = "<input class='form-control' width='250'" +
+                "placeholder='제목 입력' id='updateTitle'>";
+
+            $("#title").html(str);
+            str = "<textarea class='form-control' placeholder='내용 입력'" +
+                "id='updateContent'></textarea>";
+            $("#content").html(str);
+            $("#updateBtn").attr("id", "updateConfirmBtn");
+
+        })
+    });
+
+</script>
+
+<!-- 댓글 작성 -->
+
+<script th:inline="javascript">
+    $(document).on('ready', function (e) {
+        $("#commentUploadBtn").click(function () {
+            let content = $("textarea[name=commentContent]").val();
+
+            $.post("/comment",
+                {
+                    author : userAuthorId,
+                    boardId: id,
+                    content: content
+                },
+                function (data) { //data가 controller에서 리턴해주는 값
+                    if (data === "success") {
+                        location.href = "/view?id=" + id;
+                    } else {
+                        alert(data); // 그냥 data를 alert해도 되고
+                    }
+                });
+        });
+    });
+</script>
+
+<div style="position: absolute;left:150px; right:150px; top:400px">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header with-border">
+                <h3 class="card-title text-center text-danger">댓글 작성</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="form-group col-sm-10">
+                        <textarea class="form-control" placeholder='댓글 입력' name="commentContent"></textarea>
+                    </div>
+                    <script th:inline="javascript">
+                        if (loginId !== null) document.write('<button id="commentUploadBtn" class="btn btn-danger btn-sm float-right">댓글 등록하기</button>');
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).on('ready', function (e) {
+
+            $.post("/view",
+                {
+                    id: id,
+                },
+                function (data) { //data가 controller에서 리턴해주는 값
+                    let list = $('#list').html();
+
+                    Mustache.parse(list);
+
+                    let renderedList = Mustache.render(list, data);
+
+                    $('#commentTable').html(renderedList);
+
+                    $(".pagination").append('<li id="pagingPrev" class="page-item"><input type="submit" class="page-link" name =' + (data.paging.startPage - 1) + ' value = "Prev"></li>');
+
+                    for (let i = data.paging.startPage; i <= data.paging.endPage; ++i) {
+                        $(".pagination").append('<li class="page-item"><input type="button" class="page-link" id = ' + i + ' value = ' + i + ' name = ' + i + '></li>')
+                    }
+
+                    $(".pagination").append('<li id="pagingNext" class="page-item"><input type="submit" class="page-link" name =' + (data.paging.endPage + 1) + ' value = "Next"></li>');
+
+                    document.getElementById(data.paging.cri.page).style.color = 'red';
+
+                });
+
+            document.addEventListener('click', function myFunction(e) {
+                if (e.target.getAttribute('class') === "page-link") {
+                    $.post("/view",
+                        {
+                            id: id,
+                            page: e.target.getAttribute('name')
+                        },
+                        function (data) { //data가 controller에서 리턴해주는 값
+                            let list = $('#list').html();
+                            $("#boardTable").empty();
+
+                            Mustache.parse(list);
+
+                            let renderedList = Mustache.render(list, data);
+
+                            $('#commentTable').html(renderedList);
+
+                            $(".pagination").empty();
+                            $(".pagination").append('<li id="pagingPrev" class="page-item"><input type="submit" class="page-link" name =' + (data.paging.startPage - 1) + ' value = "Prev"></li>');
+
+                            for (let i = data.paging.startPage; i <= data.paging.endPage; ++i) {
+                                $(".pagination").append('<li class="page-item"><input type="button" class="page-link" id = ' + i + ' value = ' + i + ' name = ' + i + '></li>')
+                            }
+
+                            $(".pagination").append('<li id="pagingNext" class="page-item"><input type="submit" class="page-link" name =' + (data.paging.endPage + 1) + ' value = "Next"></li>');
+
+                            document.getElementById(data.paging.cri.page).style.color = 'red';
+
+
+
+                        });
+                }
+            })
+
+
+        });
+    </script>
+
+
+    <script id="list" type="x-tmpl-mustache">
+        {{#list}}
+            <tr>
+                <td>{{content}}</td>
+                <td>{{author.username}}</td>
+                <td><a href='/commentView?id={{id}}'>수정/삭제</td>
+            </tr>
+        {{/list}}
+
+    </script>
+
+
+    <table class="table table-striped" style="table-layout: fixed">
+        <thread>
+            <th width="80%">내용</th>
+            <th width="10%">작성자</th>
+            <th width="10%">수정/삭제</th>
+
+        </thread>
+        <tbody id="commentTable">
+
+        </tbody>
+    </table>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+
+                <ul class="pagination">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+<script>
+    includeHTML();
+</script>
+</html>

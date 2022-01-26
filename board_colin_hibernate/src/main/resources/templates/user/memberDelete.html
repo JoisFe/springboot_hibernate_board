@@ -1,0 +1,92 @@
+<html lang="ko" xmlns xmlns:th="http://www.w3.org/1999/xhtml" : th="http://www.thymeleaf.org">
+
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/latest/js/bootstrap.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+
+    <script src="js/includeHTML.js"></script>
+    <title>회원탈퇴 페이지</title>
+
+    <style>
+        body {
+            background: #f8f8f8;
+            padding: 100px 0;
+        }
+
+        #login-form > div {
+            margin: 50px 0;
+        }
+
+    </style>
+
+</head>
+<body>
+<div th:unless="${session.id}"><nav include-html="html/nav.html"></nav></div>
+<div th:if="${session.id}"><nav include-html="html/nav2.html"></nav></div>
+
+<script th:inline="javascript">
+    let same = [[${same}]];
+
+    if (same != null) alert(same);
+
+</script>
+
+<div class="container">
+    <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <div class="panel-title">회원탈퇴 페이지 입니다.</div>
+            </div>
+
+            <script th:inline="javascript">
+                $(document).on('ready', function (e) {
+                    $("#deleteBtn").click(function () {
+
+                        let author = $("input[type=text]").val();
+                        let password = $("input[type=password]").val();
+
+                        if (confirm("정말 회원 탈퇴 하시겠습니까?")) {
+                            $.post("/memberDelete",
+                                {
+                                    author: author,
+                                    password: password
+                                },
+                                function (data) { //data가 controller에서 리턴해주는 값
+                                    if (data === "success") {
+                                        location.href = "/logout";  // 로그아웃으로 보내야 회원탈퇴되면서 회원탈퇴된 아이디로 등록된 세션값 날라감
+                                    } else {
+                                        alert(data); // 그냥 data를 alert해도 되고
+                                    }
+                                });
+                        } else {
+                            $.get("/memberDelete");
+                        }
+                    });
+                });
+
+            </script>
+
+
+            <div>
+                <input type="text" class="form-control" id="id" name="userId" readonly>
+                <script th:inline="javascript">
+                    let id = [[${id}]];
+                    document.getElementById('id').value = id;
+                </script>
+
+                <input type="password" class="form-control" placeholder='PASSWORD' name="password">
+
+                <button id="deleteBtn" class="btn btn-danger btn-sm float-right">회원 탈퇴</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+<script>
+    includeHTML();
+</script>
+</html>

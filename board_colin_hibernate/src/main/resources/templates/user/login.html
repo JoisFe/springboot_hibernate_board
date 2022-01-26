@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko" xmlns xmlns:th="http://www.w3.org/1999/xhtml" : th="http://www.thymeleaf.org">
+
+<head>
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/latest/js/bootstrap.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="js/includeHTML.js"></script>
+    <title>로그인 페이지</title>
+    <style>
+        body {
+            background: #f8f8f8;
+            padding: 100px 0;
+        }
+
+        #login-form > div {
+            margin: 50px 0;
+        }
+
+    </style>
+
+</head>
+<body>
+<div th:unless="${session.id}"><nav include-html="html/nav.html"></nav></div>
+<div th:if="${session.id}"><nav include-html="html/nav2.html"></nav></div>
+
+<h1 class="text-center text-danger">로그인 하기</h1>
+
+<div class="container">
+    <div class="col-md-6 col-md-offset-3 col-sm-8 col-sm-offset-2">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <div class="panel-title">로그인 페이지 입니다.</div>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li><a href="register.html">회원가입</a></li>
+                </ul>
+            </div>
+
+            <script th:inline="javascript">
+               /*<![CDATA[*/
+               let message = [[${fail}]];
+               if (message !== null) alert(message);
+               /*]]>*/
+            </script>
+
+            <div>
+                <form id = "login_form" action="/login" method = "post">
+                <div>
+                    <input type="text" class="form-control" placeholder='ID' name="username"/>
+                </div>
+                <div>
+                    <input type="password" class="form-control" placeholder="Password" name="password">
+                </div>
+
+                <input type="submit" id="loginBtn" class="btn btn-danger btn-sm float-right"></input>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    includeHTML();
+</script>
+</html>

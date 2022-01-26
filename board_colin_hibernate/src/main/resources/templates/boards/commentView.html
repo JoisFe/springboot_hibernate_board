@@ -1,0 +1,91 @@
+<html xmlns:th="http://www.w3.org/1999/xhtml" : th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>댓글 상세 페이지</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+
+    <script src="js/includeHTML.js"></script>
+
+</head>
+
+<body>
+
+<div th:unless="${id}"><nav include-html="html/nav.html"></nav></div>
+<div th:if="${id}"><nav include-html="html/nav2.html"></nav></div>
+
+<div style="position: absolute;left:150px; right:150px; top:60px">
+    <h1 class="text-center text-danger">댓글 상세 내용</h1>
+    <p>작성자 : [[${list.author.username}]]</p>
+    내용 :
+    <div id="content">
+<textarea readonly="readonly"
+          class="form-control"
+          th:text="${list.content}">
+</textarea>
+    </div>
+    <div th:if="${list.author.username} == ${id}"><button id="deleteBtn" class="btn btn-danger btn-sm float-right">삭제</button></div>
+    <div th:if="${list.author.username} == ${id}"><button id="updateBtn" class="btn btn-info btn-sm float-right">수정</button></div>
+</div>
+
+<script th:inline="javascript">
+    $(document).on('ready', function (e) {
+        let id = [[${list.id}]];
+        let boardId = [[${list.boardId.id}]];
+        let authorId = [[${list.author.id}]];
+        let authorName = [[${list.author.username}]]
+
+
+        $(document).on('click', '#deleteBtn', function (e) {
+            $.post("/deleteComment",
+                {
+                    id: id,
+                    boardId: boardId,
+                    authorName: authorName
+                },
+                function (data) {
+                    if (data === "success") {
+                        location.href = "/view?id=" + boardId;
+                    } else {
+                        alert(data);
+                    }
+                })
+        })
+
+        $(document).on('click', '#updateConfirmBtn', function (e) {
+            let updateContent = $('#updateContent').val();
+
+            $.post("/updateComment",
+                {
+                    id: id,
+                    boardId: boardId,
+                    author: authorId,
+                    content: updateContent,
+
+                },
+                function (data) {
+                    if (data === "success") {
+                        location.href = "/view?id=" + boardId;
+                    } else {
+                        alert(data);
+                    }
+                })
+        })
+
+        $(document).on('click', '#updateBtn', function (e) {
+            $("#content").html("<textarea class='form-control' placeholder='내용 입력' id='updateContent'></textarea>");
+            $("#updateBtn").attr("id", "updateConfirmBtn");
+
+        })
+    })
+
+</script>
+</body>
+<script>
+    includeHTML();
+</script>
+</html>

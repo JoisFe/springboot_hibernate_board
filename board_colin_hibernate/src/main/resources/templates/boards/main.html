@@ -1,0 +1,149 @@
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>메인 페이지</title>
+
+    <link href="css/bootstrap.css" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+
+    <script src="js/includeHTML.js"></script>
+
+    <script src="mustache.min.js"></script>
+</head>
+
+<body>
+<script>
+    $(document).on('ready', function (e) {
+        $.post("/main",
+            function (data) {
+                let list = $('#list').html();
+
+                let renderedList = Mustache.render(list, data);
+
+                $("#boardTable").html(renderedList);
+
+                const pagingTemplate = $("#paginationTemplate").html();
+
+                const pagingData = {
+                    startPage: data.paging.startPage - 1,
+                    pages: [],
+                    endPage: data.paging.endPage + 1
+                };
+
+                for (let i = data.paging.startPage; i <= data.paging.endPage; ++i) {
+                    pagingData.pages.push(i);
+                }
+
+                $("#paginationId").html(Mustache.render(pagingTemplate, pagingData));
+
+                document.getElementById(data.paging.cri.page).style.color = 'red';
+
+            });
+
+        document.addEventListener('click', function myFunction(e) {
+            if (e.target.getAttribute('class') === "page-link") {
+                $.post("/main",
+                    {
+                        page: e.target.getAttribute('name')
+                    },
+                    function (data) { //data가 controller에서 리턴해주는 값
+                        let list = $('#list').html();
+
+                        let renderedList = Mustache.render(list, data);
+
+                        $("#boardTable").html(renderedList);
+
+                        const pagingTemplate = $("#paginationTemplate").html();
+
+                        const pagingData = {
+                            startPage: data.paging.startPage - 1,
+                            pages: [],
+                            endPage: data.paging.endPage + 1
+                        };
+
+                        for (let i = data.paging.startPage; i <= data.paging.endPage; ++i) {
+                            pagingData.pages.push(i);
+                        }
+
+
+                        $("#paginationId").html(Mustache.render(pagingTemplate, pagingData));
+
+                        document.getElementById(data.paging.cri.page).style.color = 'red';
+                    });
+            }
+        })
+    });
+</script>
+
+
+<div th:if="${id}"><nav include-html="html/nav2.html"></nav></div>
+<div th:unless="${id}"><nav include-html="html/nav.html"></nav></div>
+
+
+<div id="main" style="position: absolute;left:150px; right:150px; top:60px">
+    <h1 class="text-center text-danger">게시판</h1>
+
+
+    <div th:unless="${id}">비 로그인 상태입니다.</div>
+    <div th:if="${id}"> 로그인한 아이디 : <p class='text-body' th:text="${id}"></p><br></div>
+
+
+
+    <script id="list" type="x-tmpl-mustache">
+        {{#list}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{author.username}}</td>
+                <td><a href='/view?id={{id}}'>{{title}}</td>
+                <td>{{createdDate}}</td>
+                <td>{{modifiedDate}}</td>
+            </tr>
+        {{/list}}
+
+    </script>
+
+    <script id="paginationTemplate" type="x-tmpl-mustache">
+        <li id="pagingPrev" class="page-item"><input type="submit" class="page-link" name ='{{startPage}}' value = "Prev"></li>
+        {{#pages}}
+            <li id="paging{{.}}" class="page-item"><input type="submit" class="page-link" id="{{.}}" value="{{.}}" name="{{.}}"></li>
+        {{/pages}}
+        <li id="pagingNext" class="page-item"><input type="submit" class="page-link" name ='{{endPage}}' value = "Next"></li>
+
+    </script>
+
+    <table id="tblBoard" class="table table-striped" style="table-layout: fixed">
+        <thead>
+        <tr>
+            <th>글번호</th>
+            <th>작성자</th>
+            <th>제목</th>
+            <th>생성 날짜</th>
+            <th>수정 날짜</th>
+        </tr>
+        </thead>
+        <tbody id="boardTable">
+        </tbody>
+    </table>
+
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="pagination" id="paginationId">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button th:if="${id}" type="button" class="btn btn-primary btn-lg pull-right" onclick="location.href='/upload';">글 등록하기</button>
+
+</div>
+</body>
+<script>
+    includeHTML();
+</script>
+</html>

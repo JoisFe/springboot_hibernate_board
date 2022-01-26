@@ -1,0 +1,66 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>게시글 등록 페이지</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/latest/js/bootstrap.min.js"></script>
+
+    <script src="js/includeHTML.js"></script>
+</head>
+<body>
+{{#id}}
+    <nav include-html="html/nav2.html"></nav>
+{{/id}}
+{{^id}}
+    <nav include-html="html/nav.html"></nav>
+{{/id}}
+
+<div style="position: absolute;left:150px; right:150px; top:60px">
+    <h1 class="text-center text-danger">게시판 글 등록하기</h1>
+
+    <script>
+        $(document).on('ready', function (e) {
+            $("#uploadBtn").click(function () {
+                let author = $("input[name=author]").val();
+                let title = $("input[name=title]").val();
+                let content = $("textarea[name=content]").val();
+
+                $.post("/upload",
+                        {
+                            author: author,
+                            title: title,
+                            content: content
+                        },
+                        function (data) { //data가 controller에서 리턴해주는 값
+                            if (data === "success") {
+                                location.href = "/main";
+                            } else {
+                                alert(data); // 그냥 data를 alert해도 되고
+                            }
+                        });
+            });
+        });
+
+    </script>
+
+    <div>
+        <input type="text" class="form-control" id="id" name="userId" value="{{id}}" readonly>
+        <input type="text" class="form-control" id="id" name="author" value="{{authorId}}" hidden>
+        <input type="text" class="form-control" placeholder='제목 입력' name="title">
+        <textarea cols="50" rows="10" class="form-control" placeholder='내용 입력' name="content"></textarea>
+
+        <button id="uploadBtn" class="btn btn-danger btn-sm float-right">등록하기</button>
+    </div>
+
+</div>
+
+</body>
+<script>
+    includeHTML();
+</script>
+</html>
